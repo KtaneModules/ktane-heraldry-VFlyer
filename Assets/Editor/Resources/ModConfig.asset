@@ -13,11 +13,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: heraldry
   title: Heraldry
-  description: "Who doesn't need a coat of arms on their bedroom wall?\n\r\nModule
-    by TheThirdMan\r\nmoduleID: heraldry\r\n\r\nGitHub Repository: https://github.com/luisdiogo98/ktane-heraldry\n\r\nManual
-    HTML: https://ktane.timwi.de/HTML/Heraldry.html\r\nManual PDF: https://ktane.timwi.de/PDF/Heraldry.pdf\r\n\r\nAny
-    problems/suggestions, feel free to contact me on the KTaNE Discord @TheThirdMan.
-    Join the KTaNE Discord here: https://discord.gg/Fv7YEDj"
-  version: 1.5
+  description: "Who doesn't need a coat of arms on their bedroom wall?\n\n\r[b]THIS
+    IS A REUPLOAD OF A MODULE BY THE ORIGINAL AUTHOR. Please unsubscribe/disable the
+    original mod [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1878642756]here.[/b]\n\nModule
+    Originally Developed by TheThirdMan\r\nReuploaded and Maintained by VFlyer\nmoduleID:
+    heraldry\r\n\r\nGitHub Repository (Old): https://github.com/luisdiogo98/ktane-heraldry\nGitHub
+    Repository (Reupload): https://github.com/VFlyer/ktane-heraldry\r\n\nManual HTML:
+    https://ktane.timwi.de/HTML/Heraldry.html\r\nManual PDF: https://ktane.timwi.de/PDF/Heraldry.pdf\r\n"
+  version: 1.5.01
   outputFolder: build
   previewImage: {fileID: 2800000, guid: a86be9a65229d594d92051e0656d72c2, type: 3}

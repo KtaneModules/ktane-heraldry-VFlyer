@@ -21,12 +21,12 @@ public class Heraldry : MonoBehaviour
     private bool moduleSolved;
 
 	int animating = 0;
-
+	const int CrestsToGenerate = 32;
 	int currentCrest = 0;
-	Crest[] crests = new Crest[48];
+	Crest[] crests = new Crest[CrestsToGenerate];
 	List<int> order;
-	List<int> familyNamesOrder;
-	int[] crestCount = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
+	//List<int> familyNamesOrder;
+	int[] crestCount = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
 
 	int grid;
 
@@ -42,6 +42,7 @@ public class Heraldry : MonoBehaviour
 	public GameObject[] pages;
 	public GameObject[] crestObjects;
 	public Material[] materials;
+	public TextMesh[] pageMeshes;
 
 	bool[][][] grids = new bool[][][]
 	{
@@ -230,7 +231,7 @@ public class Heraldry : MonoBehaviour
 
 	void PrevPage()
 	{
-		if(currentCrest == 0 || animating > 0)
+		if(currentCrest <= 0 || animating > 0)
 			return;
 
 		StartCoroutine(PageTurnAnim(pages[(currentCrest / 2) - 1], -1));
@@ -240,7 +241,7 @@ public class Heraldry : MonoBehaviour
 
 	void NextPage()
 	{
-		if(currentCrest == 46 || animating < 0)
+		if(currentCrest >= CrestsToGenerate - 2 || animating < 0)
 			return;
 
 		StartCoroutine(PageTurnAnim(pages[currentCrest / 2], 1));
@@ -256,23 +257,23 @@ public class Heraldry : MonoBehaviour
 		int selected = currentCrest + dif;
 
 		int sol;
-
-		if(unicorn) sol = 1;
-		else if(bomb.GetSolvedModuleNames().Count() % 4 == 0) sol = 2;
-		else if(bomb.GetSolvedModuleNames().Count() % 4 == 1) sol = 3;
-		else if(bomb.GetSolvedModuleNames().Count() % 4 == 2) sol = 4;
+		var solveCount = bomb.GetSolvedModuleNames().Count();
+		if (unicorn) sol = 1;
+		else if(solveCount % 4 == 0) sol = 2;
+		else if(solveCount % 4 == 1) sol = 3;
+		else if(solveCount % 4 == 2) sol = 4;
 		else sol = 5;
 
 		if(selected == order[sol])
 		{
-			Debug.LogFormat("[Heraldry #{0}] Correctly selected crest #{1}. Module solved.", moduleId, order[sol] + 1);
+			Debug.LogFormat("[Heraldry #{0}] Correctly selected Crest #{1} at {2} solve{3}. Module solved.", moduleId, order[sol] + 1, solveCount, solveCount == 1 ? "" : "s");
 			moduleSolved = true;
 			Audio.PlaySoundAtTransform("trumpet", transform);
             GetComponent<KMBombModule>().HandlePass();
 		}
 		else
 		{
-			Debug.LogFormat("[Heraldry #{0}] Strike! Selected crest #{1} when crest #{2} was expected.", moduleId, selected + 1, order[sol] + 1);
+			Debug.LogFormat("[Heraldry #{0}] Strike! Selected Crest #{1} when Crest #{2} was expected at {3} solve{4}.", moduleId, selected + 1, order[sol] + 1, solveCount, solveCount == 1 ? "" : "s");
             GetComponent<KMBombModule>().HandleStrike();
 		}
 
@@ -285,7 +286,7 @@ public class Heraldry : MonoBehaviour
 
 	void GenerateCrests()
 	{
-		order = Enumerable.Range(0, 48).OrderBy(x => rnd.Range(0, 10000)).ToList();
+		order = Enumerable.Range(0, CrestsToGenerate).OrderBy(x => rnd.Range(0, 10000)).ToList();
 
 		int royal = rnd.Range(0, 16);
 		crestCount[royal]--;
@@ -333,9 +334,9 @@ public class Heraldry : MonoBehaviour
 
 		int cnt = 10;
 
-		for(int i = 0; i < validDivitions.Length; i++)
-			for(int j = 0; j < validDivitions[i].Count; j++)
-				while(crestCount[validDivitions[i][j]] != 0)
+		for(int i = 0; i < validDivitions.Length && cnt < CrestsToGenerate; i++)
+			for(int j = 0; j < validDivitions[i].Count && cnt < CrestsToGenerate; j++)
+				while(crestCount[validDivitions[i][j]] > 0 && cnt < CrestsToGenerate)
 				{
 					crestCount[validDivitions[i][j]]--;
 					crests[order[cnt]] = Crest.Build(validDivitions[i][j], validTinctures[i], validCharges[i], false);
@@ -343,10 +344,10 @@ public class Heraldry : MonoBehaviour
 				}
 		
 		for(int i = 1; i < order.Count; i++)
-			if(crests.Where(x => x.familyName == crests[order[i]].familyName).Count() != 1)
+			if(crests.Count(x => x.familyName == crests[order[i]].familyName) != 1)
 			{
 				string name;
-				do name = Crest.familyNames.OrderBy(x => rnd.Range(0, 100000)).ToList()[0]; while (crests.Where(x => x.familyName == name).Count() != 0);
+				do name = Crest.familyNames.OrderBy(x => rnd.Range(0, 100000)).ToList()[0]; while (crests.Count(x => x.familyName == name) != 0);
 				crests[order[i]].familyName = name;
 			}
 
@@ -418,7 +419,7 @@ public class Heraldry : MonoBehaviour
 		if(bomb.GetBatteryCount() == 2 && bomb.GetBatteryHolderCount() == 1 && bomb.IsIndicatorOn(Indicator.FRK) && !bomb.IsPortPresent(Port.Serial) && !bomb.IsPortPresent(Port.Parallel))
 		{
 			unicorn = true;
-			Debug.LogFormat("[Heraldry #{0}] The Order of the Unicorn calls for you. Solution is crest #{1}.", moduleId, order[1] + 1);
+			Debug.LogFormat("[Heraldry #{0}] The Order of the Unicorn calls for you. Solution is Crest #{1}.", moduleId, order[1] + 1);
 		}
 		else
 		{
@@ -430,28 +431,30 @@ public class Heraldry : MonoBehaviour
 				Debug.LogFormat("[Heraldry #{0}] Solution for 4x + {1} solves: Crest #{2}.", moduleId, i, order[i + 2] + 1);
 			}
 		}
+		Debug.LogFormat("[Heraldry #{0}] -------------- User Interactions --------------", moduleId);
 	}
 
 	IEnumerator PageTurnAnim(GameObject page, int direction)
 	{
 		animating += direction;
+		var newPage = currentCrest + 2 * direction + 1;
+
 
 		Audio.PlaySoundAtTransform("pageTurn", transform);
 
 		float heightDif = page.transform.localPosition.y - 0.0145f;
-
-		for(int i = 0; i < 20; i++)
+		pageMeshes[direction > 0 ? 1 : 0].text = (newPage + (direction > 0 ? 1 : 0)).ToString();
+		for (int i = 0; i < 20; i++)
 		{
 			page.transform.RotateAround(axis.transform.position, axis.transform.up, 9f * direction);
 			yield return new WaitForSeconds(0.01f);
 		}
-
+		pageMeshes[direction > 0 ? 0 : 1].text = (newPage + (direction > 0 ? 0 : 1)).ToString();
 		page.transform.localPosition = new Vector3(page.transform.localPosition.x, 0.0168f - heightDif, page.transform.localPosition.z);
-
 		animating -= direction;
 	}
 
-    //twitch plays
+    //twitch plays handler, originally by eXish, modified by VFlyer
     private bool cmdIsValid(string cmd)
     {
         char[] valids = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
@@ -465,12 +468,7 @@ public class Heraldry : MonoBehaviour
                 }
             }
             int temp = 0;
-            int.TryParse(cmd, out temp);
-            if (temp < 1 || temp > 48)
-            {
-                return false;
-            }
-            return true;
+            return int.TryParse(cmd, out temp) && temp >= 1 && temp <= CrestsToGenerate;
         }
         else
         {
@@ -479,38 +477,38 @@ public class Heraldry : MonoBehaviour
     }
 
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cycle [Quickly cycles through all the crests] | !{0} crest <#> [Goes to crest #, valid #'s are 1-48] | !{0} submit left/right [Submits the currently shown crest on the left or right]";
+    private readonly string TwitchHelpMessage = "\"!{0} cycle\" [Quickly cycles through all the crests] | \"!{0} crest <#>\" [Goes to crest #, valid #'s are 1-48] | !{0} \"submit left/right\" [Submits the currently shown crest on the left or right]";
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
         if (Regex.IsMatch(command, @"^\s*cycle\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             yield return null;
+			var lastCrest = currentCrest;
             while (currentCrest != 0)
             {
                 pageTurners[0].OnInteract();
-                yield return new WaitForSeconds(0.1f);
-            }
-            while (currentCrest != 46)
+				yield return "trywaitcancel 1f The crest cycling has been halted due to a request to cancel!";
+			}
+            while (currentCrest < CrestsToGenerate - 2)
             {
                 pageTurners[1].OnInteract();
-                yield return new WaitForSeconds(1f);
-                yield return "trycancel The crest cycling has been halted due to a request to cancel";
+                yield return "trywaitcancel 1f The crest cycling has been halted due to a request to cancel!";
             }
-            while (currentCrest != 0)
+            while (currentCrest != lastCrest)
             {
                 pageTurners[0].OnInteract();
-                yield return new WaitForSeconds(0.1f);
-            }
+				yield return "trywaitcancel 1f Restoring to the original crest has been halted due to a request to cancel!";
+			}
             yield break;
         }
-        if (Regex.IsMatch(command, @"^\s*submit left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        if (Regex.IsMatch(command, @"^\s*submit l(eft)?\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             yield return null;
             crestSelectors[0].OnInteract();
             yield break;
         }
-        if (Regex.IsMatch(command, @"^\s*submit right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        if (Regex.IsMatch(command, @"^\s*submit r(ight)?\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             yield return null;
             crestSelectors[1].OnInteract();
@@ -526,21 +524,29 @@ public class Heraldry : MonoBehaviour
                     yield return null;
                     int temp = 0;
                     int.TryParse(parameters[1], out temp);
-                    if(temp % 2 == 0)
+					if (temp % 2 == 0)
                     {
-                        temp = temp - 1;
+                        temp -= 1;
                     }
-                    if((currentCrest+1) < temp)
+                    if ((currentCrest + 1) < temp)
                     {
-                        while((currentCrest+1) != temp) { pageTurners[1].OnInteract(); yield return new WaitForSeconds(0.1f); }
+						while ((currentCrest + 1) != temp)
+						{
+							pageTurners[1].OnInteract();
+							yield return "trywaitcancel 0.1f Accessing the specified crest has been canceled!";
+						}
                     }
                     else if ((currentCrest + 1) > temp)
                     {
-                        while ((currentCrest + 1) != temp) { pageTurners[0].OnInteract(); yield return new WaitForSeconds(0.1f); }
+                        while ((currentCrest + 1) != temp)
+						{
+							pageTurners[0].OnInteract();
+							yield return "trywaitcancel 0.1f Accessing the specified crest has been canceled!";
+						}
                     }
                     else
                     {
-                        yield return "sendtochat I'm already showing this crest!";
+                        yield return "sendtochat I'm already showing this crest, {0}!";
                     }
                 }
             }
