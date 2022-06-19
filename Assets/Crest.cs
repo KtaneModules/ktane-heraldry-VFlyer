@@ -8,80 +8,85 @@ using rnd = UnityEngine.Random;
 
 class Crest {
 
-    static public readonly int OR = 0;
-    static public readonly int ARGENT = 1;
-    static public readonly int GULES = 2;
-    static public readonly int AZURE = 3;
-    static public readonly int VERT = 4;
-    static public readonly int PURPURE = 5;
-    static public readonly int SABLE = 6;
-    static public readonly int CELESTE = 7;
-    static public readonly int SANGUINE = 8;
-    static public readonly int MURREY = 9;
-    static public readonly int TENNE = 10;
+    // Crest Colors
+    public const int OR = 0;
+    public const int ARGENT = 1;
+    public const int GULES = 2;
+    public const int AZURE = 3;
+    public const int VERT = 4;
+    public const int PURPURE = 5;
+    public const int SABLE = 6;
+    public const int CELESTE = 7;
+    public const int SANGUINE = 8;
+    public const int MURREY = 9;
+    public const int TENNE = 10;
 
-    static public readonly int LION = 0;
-    static public readonly int EAGLE = 1;
-    static public readonly int HORSE = 2;
-    static public readonly int HOUND = 3;
-    static public readonly int BEAR = 4;
-    static public readonly int STAG = 5;
-    static public readonly int DOLPHIN = 6;
-    static public readonly int SERPENT = 7;
-    static public readonly int OX = 8;
-    static public readonly int BOAR = 9;
-    static public readonly int GRIFFIN = 10;
-    static public readonly int DRAGON = 11;
-    static public readonly int SEAHORSE = 12;
-    static public readonly int UNICORN = 13;
+    // Animal Charges
+    public const int LION = 0;
+    public const int EAGLE = 1;
+    public const int HORSE = 2;
+    public const int HOUND = 3;
+    public const int BEAR = 4;
+    public const int STAG = 5;
+    public const int DOLPHIN = 6;
+    public const int SERPENT = 7;
+    public const int OX = 8;
+    public const int BOAR = 9;
+    public const int GRIFFIN = 10;
+    public const int DRAGON = 11;
+    public const int SEAHORSE = 12;
+    public const int UNICORN = 13;
 
-    static public readonly int GREEK = 14;
-    static public readonly int MOLINE = 15;
-    static public readonly int PATONCE = 16;
-    static public readonly int FLORY = 17;
-    static public readonly int POMMEE = 18;
-    static public readonly int CROSSLET = 19;
-    static public readonly int POTENT = 20;
-    static public readonly int SALTIRE = 21;
-    static public readonly int VOIDED = 22;
-    static public readonly int FOURCHEE = 23;
-    static public readonly int PATTEE = 24;
-    static public readonly int MALTESE = 25;
-    static public readonly int BOTTONY = 26;
+    // Cross Charges
+    public const int GREEK = 14;
+    public const int MOLINE = 15;
+    public const int PATONCE = 16;
+    public const int FLORY = 17;
+    public const int POMMEE = 18;
+    public const int CROSSLET = 19;
+    public const int POTENT = 20;
+    public const int SALTIRE = 21;
+    public const int VOIDED = 22;
+    public const int FOURCHEE = 23;
+    public const int PATTEE = 24;
+    public const int MALTESE = 25;
+    public const int BOTTONY = 26;
 
-    static public readonly int ROUNDEL = 27;
-    static public readonly int ANNULET = 28;
-    static public readonly int MULLET = 29;
-    static public readonly int MASCLE = 30;
-    static public readonly int FLEUR_DE_LIS = 31;
-    static public readonly int CROWN = 32;
-    static public readonly int LYRE = 33;
-    static public readonly int SHELL = 34;
-    static public readonly int SUN = 35;
-    static public readonly int MOON = 36;
-    static public readonly int TOWER = 37;
-    static public readonly int KEYS = 38;
-    static public readonly int SWORDS = 39;
-    static public readonly int FLOWER = 40;
-    static public readonly int LEAF = 41;
-    static public readonly int HAND = 42;
+    // Misc Charges
+    public const int ROUNDEL = 27;
+    public const int ANNULET = 28;
+    public const int MULLET = 29;
+    public const int MASCLE = 30;
+    public const int FLEUR_DE_LIS = 31;
+    public const int CROWN = 32;
+    public const int LYRE = 33;
+    public const int SHELL = 34;
+    public const int SUN = 35;
+    public const int MOON = 36;
+    public const int TOWER = 37;
+    public const int KEYS = 38;
+    public const int SWORDS = 39;
+    public const int FLOWER = 40;
+    public const int LEAF = 41;
+    public const int HAND = 42;
 
-    static public readonly int PLAIN = 0;
-    static public readonly int QUARTERLY = 1;
-    static public readonly int PILE = 2;
-    static public readonly int PARTYPERCHEVRON = 3;
-    static public readonly int PARTYPERPALE = 4;
-    static public readonly int PARTYPERFESS = 5;
-    static public readonly int PARTYPERBEND = 6;
-    static public readonly int PARTYPERSALTIRE = 7;
-    static public readonly int PALL = 8;
-    static public readonly int FESS = 9;
-    static public readonly int BEND = 10;
-    static public readonly int SALTIRE_DIV = 11;
-    static public readonly int CROSS = 12;
-    static public readonly int CHIEF = 13;
-    static public readonly int PALE = 14;
-    static public readonly int CHEVRON = 15;
+    // Crest Type
+    public const int PLAIN = 0;
+    public const int QUARTERLY = 1;
+    public const int PILE = 2;
+    public const int PARTYPERCHEVRON = 3;
+    public const int PARTYPERPALE = 4;
+    public const int PARTYPERFESS = 5;
+    public const int PARTYPERBEND = 6;
+    public const int PARTYPERSALTIRE = 7;
+    public const int PALL = 8;
+    public const int FESS = 9;
+    public const int BEND = 10;
+    public const int SALTIRE_DIV = 11;
+    public const int CROSS = 12;
+    public const int CHIEF = 13;
+    public const int PALE = 14;
+    public const int CHEVRON = 15;
 
     static protected readonly int[] allTinctures = Enumerable.Range(0, 11).ToArray();
     static protected readonly int[] metals = { OR, ARGENT };
@@ -573,6 +578,17 @@ class Crest {
     {
 
     }
+
+    public virtual IEnumerable<int> GetColors()
+    {
+        return chargeColors.Concat(fields);
+    }
+    public virtual List<int> GetCharges()
+    {
+        return charges;
+    }
+
+
 
     public virtual int GetScore(KMBombInfo bomb)
     {

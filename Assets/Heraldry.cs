@@ -7,7 +7,7 @@ using KModkit;
 using rnd = UnityEngine.Random;
 using System.Text.RegularExpressions;
 
-public class Heraldry : MonoBehaviour 
+public class Heraldry : MonoBehaviour
 {
 	static readonly bool T = true;
 	static readonly bool F = false;
@@ -17,16 +17,16 @@ public class Heraldry : MonoBehaviour
 
 	//Logging
 	static int moduleIdCounter = 1;
-    int moduleId;
-    private bool moduleSolved;
+	int moduleId;
+	private bool moduleSolved;
 
 	int animating = 0;
-	const int CrestsToGenerate = 32;
+	const int CrestsToGenerate = 48;
 	int currentCrest = 0;
 	Crest[] crests = new Crest[CrestsToGenerate];
 	List<int> order;
 	//List<int> familyNamesOrder;
-	int[] crestCount = { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
+	int[] crestCount = Enumerable.Repeat(3, 16).ToArray();
 
 	int grid;
 
@@ -218,6 +218,29 @@ public class Heraldry : MonoBehaviour
 		new int[] { Crest.CELESTE, Crest.LYRE, Crest.SHELL, Crest.SUN, Crest.MOON, Crest.TOWER, Crest.KEYS, Crest.ROUNDEL },
 		new int[] { Crest.AZURE, Crest.SABLE, Crest.SWORDS, Crest.FLOWER, Crest.LEAF, Crest.HAND, Crest.ANNULET, Crest.MULLET },
 	};
+
+	private readonly static Dictionary<string, int> crestDivisions = new Dictionary<string, int>
+	{
+		{ "Crest", -1 },
+
+		{ "Bend", 3 },
+		{ "Chevron", 3 },
+		{ "Chief", 2 },
+		{ "Cross", 5 },
+		{ "Fess", 3 },
+		{ "Pale", 3 },
+		{ "Pall", 4 },
+		{ "PartyPerBend", 2 },
+		{ "PartyPerChevron", 2 },
+		{ "PartyPerFess", 2 },
+		{ "PartyPerPale", 2 },
+		{ "PartyPerSaltire", 4 },
+		{ "Pile", 3 },
+		{ "Plain", 1 },
+		{ "Quarterly", 4 },
+		{ "Saltire", 5 },
+	};
+
 
 	void Awake()
 	{
@@ -414,12 +437,45 @@ public class Heraldry : MonoBehaviour
 
 		Debug.LogFormat("[Heraldry #{0}] -------------- Solving --------------", moduleId);
 
-		Debug.LogFormat("[Heraldry #{0}] Royal Family Crest score: {1} (Grid {2}).", moduleId, crests[order[0]].GetScore(bomb), grid + 1);
+		var royalCrest = crests[order[0]];
 
-		if(bomb.GetBatteryCount() == 2 && bomb.GetBatteryHolderCount() == 1 && bomb.IsIndicatorOn(Indicator.FRK) && !bomb.IsPortPresent(Port.Serial) && !bomb.IsPortPresent(Port.Parallel))
+		// Crest Scoring
+		var crestName = royalCrest.GetType().Name;
+		Debug.LogFormat("[Heraldry #{0}] Crest Type: {1}", moduleId, crestName);
+		Debug.LogFormat("[Heraldry #{0}] Field Divisions in Crest Type: {1} ({2} points)", moduleId, crestDivisions[crestName], crestDivisions[crestName] * 2);
+		Debug.LogFormat("[Heraldry #{0}] Crest type {1} \"Party\" in its name. {2}", moduleId, crestName.Contains("Party") ? "has" : "does not have", crestName.Contains("Party") ? "(-1 point)" : "");
+		Debug.LogFormat("[Heraldry #{0}] Crest type is {1}symmetrical across the vertical axis.", moduleId, new[] { "PartyPerBend", "PartyPerPale", "Quarterly", "Bend" }.Contains(crestName) ? "not " : "");
+
+		// Family Name Scoring
+		var familyName = royalCrest.familyName;
+		Debug.LogFormat("[Heraldry #{0}] Family Name: {1}", moduleId, familyName);
+		Debug.LogFormat("[Heraldry #{0}] Number of letters in family name: {1}", moduleId, familyName.Count(a => !char.IsWhiteSpace(a)));
+		Debug.LogFormat("[Heraldry #{0}] Number of words in family name: {1}", moduleId, familyName.Count(a => char.IsWhiteSpace(a)) + 1);
+		Debug.LogFormat("[Heraldry #{0}] Number of letters in serial number in family name: {1}", moduleId, bomb.GetSerialNumberLetters().Count(a => familyName.Contains(a)));
+
+		// Charge Scoring
+		var charges = royalCrest.GetCharges();
+		Debug.LogFormat("[Heraldry #{0}] Number of Animal Charges: {1}", moduleId, charges.Count(a => a >= Crest.LION && a <= Crest.UNICORN));
+		Debug.LogFormat("[Heraldry #{0}] Number of Cross Charges: {1}", moduleId, charges.Count(a => a >= Crest.GREEK && a <= Crest.BOTTONY));
+		Debug.LogFormat("[Heraldry #{0}] Number of Misc Charges: {1}", moduleId, charges.Count(a => a > Crest.BOTTONY));
+
+		// Tincture Scoring
+		var tints = royalCrest.GetColors();
+		var GAVTints = new[] { Crest.GULES, Crest.AZURE, Crest.VERT };
+		var PSBCTints = new[] { Crest.PURPURE, Crest.SABLE, Crest.CELESTE };
+		var StainTints = new[] { Crest.MURREY, Crest.SANGUINE, Crest.TENNE };
+		Debug.LogFormat("[Heraldry #{0}] Gules, Azure, or Vert is {1}present in the royal crest.", moduleId, GAVTints.Any(a => tints.Contains(a)) ? "" : "not ");
+		Debug.LogFormat("[Heraldry #{0}] Purpure, Sable, or Bleu-Celeste is {1}present in the royal crest.", moduleId, PSBCTints.Any(a => tints.Contains(a)) ? "" : "not ");
+		Debug.LogFormat("[Heraldry #{0}] A stain is {1}present in the royal crest.", moduleId, StainTints.Any(a => tints.Contains(a)) ? "" : "not ");
+
+
+		// Final Score
+		Debug.LogFormat("[Heraldry #{0}] Royal Family Crest score: {1} (Grid {2}).", moduleId, royalCrest.GetScore(bomb), grid + 1);
+
+		if (bomb.GetBatteryCount() == 2 && bomb.GetBatteryHolderCount() == 1 && bomb.IsIndicatorOn(Indicator.FRK) && !bomb.IsPortPresent(Port.Serial) && !bomb.IsPortPresent(Port.Parallel))
 		{
 			unicorn = true;
-			Debug.LogFormat("[Heraldry #{0}] The Order of the Unicorn calls for you. Solution is Crest #{1}.", moduleId, order[1] + 1);
+			Debug.LogFormat("[Heraldry #{0}] The Order of the Unicorn calls for you. Discard the Royal Family Crest score. Solution is Crest #{1}.", moduleId, order[1] + 1);
 		}
 		else
 		{
@@ -467,7 +523,7 @@ public class Heraldry : MonoBehaviour
                     return false;
                 }
             }
-            int temp = 0;
+            int temp;
             return int.TryParse(cmd, out temp) && temp >= 1 && temp <= CrestsToGenerate;
         }
         else
