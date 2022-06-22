@@ -305,6 +305,10 @@ public class Heraldry : MonoBehaviour
 	void Start () 
 	{
 		GenerateCrests();
+		GetComponent<KMBombModule>().OnActivate += delegate {
+            for (var x = 0; x < pageMeshes.Length; x++)
+				pageMeshes[x].text = TwitchPlaysActive ? (currentCrest + 1).ToString() : "";
+		};
 	}
 
 	void GenerateCrests()
@@ -499,13 +503,13 @@ public class Heraldry : MonoBehaviour
 		Audio.PlaySoundAtTransform("pageTurn", transform);
 
 		float heightDif = page.transform.localPosition.y - 0.0145f;
-		pageMeshes[direction > 0 ? 1 : 0].text = (newPage + (direction > 0 ? 1 : 0)).ToString();
+		pageMeshes[direction > 0 ? 1 : 0].text = TwitchPlaysActive ? (newPage + (direction > 0 ? 1 : 0)).ToString() : "";
 		for (int i = 0; i < 20; i++)
 		{
 			page.transform.RotateAround(axis.transform.position, axis.transform.up, 9f * direction);
 			yield return new WaitForSeconds(0.01f);
 		}
-		pageMeshes[direction > 0 ? 0 : 1].text = (newPage + (direction > 0 ? 0 : 1)).ToString();
+		pageMeshes[direction > 0 ? 0 : 1].text = TwitchPlaysActive ? (newPage + (direction > 0 ? 0 : 1)).ToString() : "";
 		page.transform.localPosition = new Vector3(page.transform.localPosition.x, 0.0168f - heightDif, page.transform.localPosition.z);
 		animating -= direction;
 	}
@@ -534,6 +538,7 @@ public class Heraldry : MonoBehaviour
 
     #pragma warning disable 414
     private readonly string TwitchHelpMessage = "\"!{0} cycle\" [Quickly cycles through all the crests] | \"!{0} crest <#>\" [Goes to crest #, valid #'s are 1-48] | !{0} \"submit left/right\" [Submits the currently shown crest on the left or right]";
+	private bool TwitchPlaysActive;
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
@@ -544,17 +549,17 @@ public class Heraldry : MonoBehaviour
             while (currentCrest != 0)
             {
                 pageTurners[0].OnInteract();
-				yield return "trywaitcancel 1f The crest cycling has been halted due to a request to cancel!";
+				yield return "trywaitcancel 0.1 The crest cycling has been halted due to a request to cancel!";
 			}
             while (currentCrest < CrestsToGenerate - 2)
             {
                 pageTurners[1].OnInteract();
-                yield return "trywaitcancel 1f The crest cycling has been halted due to a request to cancel!";
+                yield return "trywaitcancel 1.0 The crest cycling has been halted due to a request to cancel!";
             }
             while (currentCrest != lastCrest)
             {
                 pageTurners[0].OnInteract();
-				yield return "trywaitcancel 1f Restoring to the original crest has been halted due to a request to cancel!";
+				yield return "trywaitcancel 0.1 Restoring to the original crest has been halted due to a request to cancel!";
 			}
             yield break;
         }
@@ -589,7 +594,7 @@ public class Heraldry : MonoBehaviour
 						while ((currentCrest + 1) != temp)
 						{
 							pageTurners[1].OnInteract();
-							yield return "trywaitcancel 0.1f Accessing the specified crest has been canceled!";
+							yield return "trywaitcancel 0.1 Accessing the specified crest has been canceled!";
 						}
                     }
                     else if ((currentCrest + 1) > temp)
@@ -597,7 +602,7 @@ public class Heraldry : MonoBehaviour
                         while ((currentCrest + 1) != temp)
 						{
 							pageTurners[0].OnInteract();
-							yield return "trywaitcancel 0.1f Accessing the specified crest has been canceled!";
+							yield return "trywaitcancel 0.1 Accessing the specified crest has been canceled!";
 						}
                     }
                     else
