@@ -307,7 +307,7 @@ public class Heraldry : MonoBehaviour
 		GenerateCrests();
 		GetComponent<KMBombModule>().OnActivate += delegate {
             for (var x = 0; x < pageMeshes.Length; x++)
-				pageMeshes[x].text = TwitchPlaysActive ? (currentCrest + 1).ToString() : "";
+				pageMeshes[x].text = TwitchPlaysActive ? (currentCrest + 1 + x).ToString() : "";
 		};
 	}
 
@@ -455,7 +455,7 @@ public class Heraldry : MonoBehaviour
 		Debug.LogFormat("[Heraldry #{0}] Family Name: {1}", moduleId, familyName);
 		Debug.LogFormat("[Heraldry #{0}] Number of letters in family name: {1}", moduleId, familyName.Count(a => !char.IsWhiteSpace(a)));
 		Debug.LogFormat("[Heraldry #{0}] Number of words in family name: {1}", moduleId, familyName.Count(a => char.IsWhiteSpace(a)) + 1);
-		Debug.LogFormat("[Heraldry #{0}] Number of letters in serial number in family name: {1}", moduleId, bomb.GetSerialNumberLetters().Count(a => familyName.Contains(a)));
+		Debug.LogFormat("[Heraldry #{0}] Number of letters in serial number in family name: {1}", moduleId, bomb.GetSerialNumberLetters().Count(x => familyName.ToUpperInvariant().ToArray().Contains(x)));
 
 		// Charge Scoring
 		var charges = royalCrest.GetCharges();
