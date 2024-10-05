@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 
 public class Heraldry : MonoBehaviour
 {
-	static readonly bool T = true;
-	static readonly bool F = false;
+	const bool T = true;
+	const bool F = false;
 
 	public KMBombInfo bomb;
 	public KMAudio Audio;
@@ -239,6 +239,26 @@ public class Heraldry : MonoBehaviour
 		{ "Plain", 1 },
 		{ "Quarterly", 4 },
 		{ "Saltire", 5 },
+	}, crestCharges = new Dictionary<string, int>
+	{
+		{ "Crest", -1 },
+
+		{ "Bend", 3 },
+		{ "Chevron", 3 },
+		{ "Chief", 3 },
+		{ "Cross", 2 },
+		{ "Fess", 3 },
+		{ "Pale", 3 },
+		{ "Pall", 3 },
+		{ "PartyPerBend", 1 },
+		{ "PartyPerChevron", 2 },
+		{ "PartyPerFess", 2 },
+		{ "PartyPerPale", 1 },
+		{ "PartyPerSaltire", 2 },
+		{ "Pile", 1 },
+		{ "Plain", 3 },
+		{ "Quarterly", 2 },
+		{ "Saltire", 4 },
 	};
 
 
@@ -445,33 +465,50 @@ public class Heraldry : MonoBehaviour
 
 		// Crest Scoring
 		var crestName = royalCrest.GetType().Name;
+		var crestScore = 0;
 		Debug.LogFormat("[Heraldry #{0}] Crest Type: {1}", moduleId, crestName);
-		Debug.LogFormat("[Heraldry #{0}] Field Divisions in Crest Type: {1} ({2} points)", moduleId, crestDivisions[crestName], crestDivisions[crestName] * 2);
-		Debug.LogFormat("[Heraldry #{0}] Crest type {1} \"Party\" in its name. {2}", moduleId, crestName.Contains("Party") ? "has" : "does not have", crestName.Contains("Party") ? "(-1 point)" : "");
-		Debug.LogFormat("[Heraldry #{0}] Crest type is {1}symmetrical across the vertical axis.", moduleId, new[] { "PartyPerBend", "PartyPerPale", "Quarterly", "Bend" }.Contains(crestName) ? "not " : "");
-
+		Debug.LogFormat("[Heraldry #{0}] Field Divisions in Crest Type: {1}", moduleId, crestDivisions[crestName]);
+		crestScore += crestDivisions[crestName] * 2;
+		Debug.LogFormat("[Heraldry #{0}] Crest type {1} \"Party\" in its name.", moduleId, crestName.Contains("Party") ? "has" : "does not have");
+		if (crestName.Contains("Party"))
+			crestScore--;
+		var notSymmetricCrestNames = new[] { "PartyPerBend", "PartyPerPale", "Quarterly", "Bend" };
+		Debug.LogFormat("[Heraldry #{0}] Crest type is {1}symmetrical across the vertical axis.", moduleId, notSymmetricCrestNames.Contains(crestName) ? "not " : "");
+		if (!notSymmetricCrestNames.Contains(crestName))
+			crestScore += 3;
+		Debug.LogFormat("[Heraldry #{0}] Division of Field Score: {1}", moduleId, crestScore);
 		// Family Name Scoring
 		var familyName = royalCrest.familyName;
+		var familyNameScore = 0;
 		Debug.LogFormat("[Heraldry #{0}] Family Name: {1}", moduleId, familyName);
 		Debug.LogFormat("[Heraldry #{0}] Number of letters in family name: {1}", moduleId, familyName.Count(a => !char.IsWhiteSpace(a)));
 		Debug.LogFormat("[Heraldry #{0}] Number of words in family name: {1}", moduleId, familyName.Count(a => char.IsWhiteSpace(a)) + 1);
+		familyNameScore += familyName.Select(a => char.IsWhiteSpace(a) ? -1 : 1).Sum() - 1;
 		Debug.LogFormat("[Heraldry #{0}] Number of letters in serial number in family name: {1}", moduleId, bomb.GetSerialNumberLetters().Count(x => familyName.ToUpperInvariant().ToArray().Contains(x)));
-
+		familyNameScore += 4 * bomb.GetSerialNumberLetters().Count(x => familyName.ToUpperInvariant().ToArray().Contains(x));
+		Debug.LogFormat("[Heraldry #{0}] Family Name Score: {1}", moduleId, familyNameScore);
 		// Charge Scoring
 		var charges = royalCrest.GetCharges();
-		Debug.LogFormat("[Heraldry #{0}] Number of Animal Charges: {1}", moduleId, charges.Count(a => a >= Crest.LION && a <= Crest.UNICORN));
-		Debug.LogFormat("[Heraldry #{0}] Number of Cross Charges: {1}", moduleId, charges.Count(a => a >= Crest.GREEK && a <= Crest.BOTTONY));
-		Debug.LogFormat("[Heraldry #{0}] Number of Misc Charges: {1}", moduleId, charges.Count(a => a > Crest.BOTTONY));
-
+		Debug.LogFormat("[Heraldry #{0}] Number of Animal Charges: {1}", moduleId, crestCharges[crestName] * charges.Count(a => a >= Crest.LION && a <= Crest.UNICORN));
+		Debug.LogFormat("[Heraldry #{0}] Number of Cross Charges: {1}", moduleId, crestCharges[crestName] * charges.Count(a => a >= Crest.GREEK && a <= Crest.BOTTONY));
+		Debug.LogFormat("[Heraldry #{0}] Number of Misc Charges: {1}", moduleId, crestCharges[crestName] * charges.Count(a => a > Crest.BOTTONY));
+		Debug.LogFormat("[Heraldry #{0}] Charge Score: {1}", moduleId, 0);
 		// Tincture Scoring
 		var tints = royalCrest.GetColors();
+		var tintScore = 0;
 		var GAVTints = new[] { Crest.GULES, Crest.AZURE, Crest.VERT };
 		var PSBCTints = new[] { Crest.PURPURE, Crest.SABLE, Crest.CELESTE };
 		var StainTints = new[] { Crest.MURREY, Crest.SANGUINE, Crest.TENNE };
 		Debug.LogFormat("[Heraldry #{0}] Gules, Azure, or Vert is {1}present in the royal crest.", moduleId, GAVTints.Any(a => tints.Contains(a)) ? "" : "not ");
+		if (GAVTints.Any(a => tints.Contains(a)))
+			tintScore += 2;
 		Debug.LogFormat("[Heraldry #{0}] Purpure, Sable, or Bleu-Celeste is {1}present in the royal crest.", moduleId, PSBCTints.Any(a => tints.Contains(a)) ? "" : "not ");
+		if (PSBCTints.Any(a => tints.Contains(a)))
+			tintScore--;
 		Debug.LogFormat("[Heraldry #{0}] A stain is {1}present in the royal crest.", moduleId, StainTints.Any(a => tints.Contains(a)) ? "" : "not ");
-
+		if (StainTints.Any(a => tints.Contains(a)))
+			tintScore += 5;
+		Debug.LogFormat("[Heraldry #{0}] Tincture Score: {1}", moduleId, tintScore);
 
 		// Final Score
 		Debug.LogFormat("[Heraldry #{0}] Royal Family Crest score: {1} (Grid {2}).", moduleId, royalCrest.GetScore(bomb), grid + 1);
